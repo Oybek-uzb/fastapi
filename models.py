@@ -13,9 +13,9 @@ class Role(str, Enum):
     student = "student"
 
 class User(BaseModel):
-    id: Optional[UUID] = uuid4
+    id: Optional[UUID] = uuid4()
     first_name: str
     last_name: str
     middle_name: Optional[str]
-    gendender: Gender
+    gender: Gender
     roles: List[Role]
