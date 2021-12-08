@@ -3,7 +3,7 @@ from uuid import UUID, uuid4
 from fastapi import FastAPI, HTTPException
 from pydantic.types import UUID1
 
-from models import Gender, Role, User
+from models import Gender, Role, User, UserUpdateRequest
 
 app = FastAPI()
 
@@ -27,10 +27,27 @@ async def register_user(user: User):
 
 @app.delete("/api/v1/users/{user_id}")
 async def delete_user(user_id: UUID):
-    print(user_id)
     for user in db:
         if user.id == user_id:
             db.remove(user)
+            return
+    raise HTTPException(
+        status_code=404,
+        detail=f"user with id: {user_id} does not exists"
+    )
+
+@app.put("/api/v1/users/{user_id}")
+async def update_user(user_info: UserUpdateRequest, user_id: UUID):
+    for user in db:
+        if user.id == user_id:
+            if user_info.first_name is not None:
+                user.first_name = user_info.first_name
+            if user_info.last_name is not None:
+                user.last_name = user_info.last_name
+            if user_info.middle_name is not None:
+                user.middle_name = user_info.middle_name
+            if user_info.roles is not None:
+                user.roles = user_info.roles
             return
     raise HTTPException(
         status_code=404,
