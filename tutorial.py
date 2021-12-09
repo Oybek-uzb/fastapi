@@ -1,5 +1,5 @@
 from typing import Optional
-from fastapi import FastAPI
+from fastapi import FastAPI, Query
 
 app = FastAPI()
 
@@ -16,3 +16,18 @@ async def read_item(item_id: str, q: Optional[str] = None): # q will be not requ
     if q:
         return {"item_id": item_id, "q": q}
     return {"item_id": item_id}
+
+@app.get("/items-q/")
+async def read_items(q: Optional[str] = Query(None, max_length=50)): # q will be Optional string, its max_length will be 50 chars and its default value will be None
+    result = {"items": [{"item_id": "Foo"}, {"item_id": "Bar"}]}
+    if q:
+        result.update({"q": q})
+    
+    return result
+
+# q: str = Query(..., max_length=19) -> q will be required. "..." is a special value in Python
+# q: Optional[List[str]] = Query(None) -> q will be able to take many values
+# Example URL: http://localhost:8000/items/?q=foo&q=bar
+# The response to this query would be { "q": [ "foo", "bar" ] }
+# q: List[str] = Query(["foo", "bar"]) -> ["foo", "bar"] is default value for q
+# q: list = Query([]) -> also valid
