@@ -1,5 +1,7 @@
-from typing import Optional
+from typing import Dict, Optional
 from fastapi import FastAPI, Query
+from fastapi.param_functions import Body
+from pydantic import BaseModel
 
 app = FastAPI()
 
@@ -31,3 +33,43 @@ async def read_items(q: Optional[str] = Query(None, max_length=50)): # q will be
 # The response to this query would be { "q": [ "foo", "bar" ] }
 # q: List[str] = Query(["foo", "bar"]) -> ["foo", "bar"] is default value for q
 # q: list = Query([]) -> also valid
+# There are also Path and Body functions like Query. As you know, Path is for path-parameters and body is for request-body.
+
+class Item(BaseModel):
+    name: str
+    description: Optional[str] = None
+    price: float
+    tax: Optional[float] = None
+
+class User(BaseModel):
+    username: str
+    full_name: Optional[str] = None
+
+@app.put("/items/{item_id}")
+async def update_item(
+    item_id: int, item: Item, user: User, importance: int = Body(...) # item_id comes from path, item, user and importance come from request-body
+):
+    results = {"item_id": item_id, "item": item, "user": user, "importance": importance}
+    return results
+# for this endpoint request body may be
+# {
+#   "item": {
+#       "name": "liboy",
+#       "description": "any description",
+#       "price": 11.11
+#       "tax": 11.1
+#   },
+#   "user": {
+#       "username": "Oybek",
+#       "full_name": "Oybek Makhsudov"
+#   }
+#   "importance": 1111
+# }
+
+# Look at the example shown below
+@app.post("/index-weights/")
+async def create_index_weights(weights: Dict[int, float]):
+    return weights
+
+# As we know, JSON only supports string key-values. But Pydantic and Python's "typing" module have automatic data conversion.
+# So even though you reciev str key-value pairs Pydantic converts it automaticly (for example, to int-float key-values)
