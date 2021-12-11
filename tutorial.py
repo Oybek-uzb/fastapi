@@ -1,7 +1,7 @@
 from typing import Dict, Optional
-from fastapi import FastAPI, Query
-from fastapi.param_functions import Body
+from fastapi import FastAPI, Query, status, Body
 from pydantic import BaseModel
+from pydantic.networks import EmailStr
 
 app = FastAPI()
 
@@ -73,3 +73,23 @@ async def create_index_weights(weights: Dict[int, float]):
 
 # As we know, JSON only supports string key-values. But Pydantic and Python's "typing" module have automatic data conversion.
 # So even though you reciev str key-value pairs Pydantic converts it automaticly (for example, to int-float key-values)
+
+class UserIn(BaseModel):
+    username: str
+    password: str
+    email: EmailStr
+    full_name: Optional[str] = None
+
+class UserOut(BaseModel):
+    username: str
+    email: EmailStr
+    full_name: Optional[str] = None
+
+@app.post("/user/", response_model=UserOut)
+async def create_user(user: UserIn):
+    return user
+# Here we are returning user which is in type UserIn. However, we shown UserOut-type in response_model. So our response will be sent in UserOut type
+
+@app.post("/items/", status_code=status.HTTP_201_CREATED)
+async def create_item(name: str):
+    return {"name": name}
