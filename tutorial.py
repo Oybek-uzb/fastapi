@@ -1,5 +1,5 @@
 from typing import Dict, Optional
-from fastapi import FastAPI, Query, status, Body
+from fastapi import FastAPI, Query, status, Body, HTTPException
 from pydantic import BaseModel
 from pydantic.networks import EmailStr
 
@@ -93,3 +93,11 @@ async def create_user(user: UserIn):
 @app.post("/items/", status_code=status.HTTP_201_CREATED)
 async def create_item(name: str):
     return {"name": name}
+
+items = {"foo": "Go Foo go"}
+
+@app.get("/items/{item_id}")
+async def read_item(item_id: str):
+    if item_id not in items:
+        raise HTTPException(status_code=404, detail="Item not found") # detail could also be a dist, a list, etc. Not only str.
+    return {"item": items[item_id]}
