@@ -1,5 +1,6 @@
 from typing import Dict, Optional
 from fastapi import FastAPI, Query, status, Body, HTTPException
+from fastapi.encoders import jsonable_encoder
 from pydantic import BaseModel
 from pydantic.networks import EmailStr
 
@@ -101,3 +102,27 @@ async def read_item(item_id: str):
     if item_id not in items:
         raise HTTPException(status_code=404, detail="Item not found") # detail could also be a dist, a list, etc. Not only str.
     return {"item": items[item_id]}
+
+
+@app.post("/items-new/", response_model=Item, tags=["items"])
+async def create_item(item: Item):
+    return item
+
+@app.get("/users/", tags=["users"])
+async def read_users():
+    return [{"username": "johnbekker"}]
+
+@app.get("/items-new/", tags=["items"])
+async def read_items():
+    return [{"name": "Foo", "price": 42}]
+
+# In the Swagger UI items-new[POST] and items-new[GET] will be in one group named "items" and users[GET] will be in another group named "users".
+# We also can add summary, description, and response_description keyword args to a method of a decoration. They also would be shown in Swagger UI.
+
+fake_db = {}
+
+@app.put("/items/{id}")
+def update_item(id: str, item: Item):
+    json_compatible_item_data = jsonable_encoder(item) # jsonable_encoder(item) -> converts item to Python dict.
+    fake_db[id] = json_compatible_item_data
+
