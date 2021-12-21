@@ -1,6 +1,7 @@
 from typing import Dict, Optional
 from fastapi import FastAPI, Query, status, Body, HTTPException
 from fastapi.encoders import jsonable_encoder
+from fastapi.param_functions import Depends
 from pydantic import BaseModel
 from pydantic.networks import EmailStr
 
@@ -126,3 +127,40 @@ def update_item(id: str, item: Item):
     json_compatible_item_data = jsonable_encoder(item) # jsonable_encoder(item) -> converts item to Python dict.
     fake_db[id] = json_compatible_item_data
 
+async def common_parameters(q: Optional[str] = None, skip: int = 0, limit: int = 100):
+    return {"q": q, "skip": skip, "limit": limit}
+
+@app.get("/items/")
+async def read_items(commons: dict = Depends(common_parameters)):
+    return commons
+
+@app.get("/users-new/")
+async def read_users_new(commons: dict = Depends(common_parameters)):
+    return commons
+
+# Dependency -> it is just a function that can take all the same parameters that a path operation function can take
+# An argument for Depends don't have to be a function. But it has to be "callable".
+# Callable is something that can be called in Python. Not only functions callabe. There is also classes.
+# So classes can also be used as an argument for Depends.
+
+class CommonQueryParams:
+    def __init__(self, q: Optional[str] = None, skip: int = 0, limit: int = 100):
+        self.q = q
+        self.skip = skip
+        self.limit = limit
+
+@app.get("/items/")
+async def read_items(commons: CommonQueryParams = Depends(CommonQueryParams)):
+    response = {}
+
+    if commons.q:
+        response.update({"q": commons.q})
+    
+    items = fake_items_db[commons.skip : commons.skip + commons.limit]
+    response.update({"items": items})
+
+    return response
+
+# Because of showing type of commons we can skip an argument in Depends.
+# Like this commons: CommonQueryParams = Depends(). By default Depends takes CommonQueryParams as an argument.
+# This is special shortcut. Great!
