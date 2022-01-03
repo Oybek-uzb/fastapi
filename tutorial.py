@@ -140,7 +140,7 @@ async def read_users_new(commons: dict = Depends(common_parameters)):
 
 # Dependency -> it is just a function that can take all the same parameters that a path operation function can take
 # An argument for Depends don't have to be a function. But it has to be "callable".
-# Callable is something that can be called in Python. Not only functions callabe. There is also classes.
+# Callable is something that can be called in Python. Not only functions callable. There is also classes.
 # So classes can also be used as an argument for Depends.
 
 class CommonQueryParams:
@@ -156,11 +156,11 @@ async def read_items(commons: CommonQueryParams = Depends(CommonQueryParams)):
     if commons.q:
         response.update({"q": commons.q})
     
-    items = fake_items_db[commons.skip : commons.skip + commons.limit]
+    items = fake_items_db[commons.skip:commons.skip + commons.limit]
     response.update({"items": items})
 
     return response
 
 # Because of showing type of commons we can skip an argument in Depends.
-# Like this commons: CommonQueryParams = Depends(). By default Depends takes CommonQueryParams as an argument.
+# Like these commons: CommonQueryParams = Depends(). By default Depends takes CommonQueryParams as an argument.
 # This is special shortcut. Great!
