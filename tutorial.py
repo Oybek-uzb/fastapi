@@ -164,3 +164,4 @@ async def read_items(commons: CommonQueryParams = Depends(CommonQueryParams)):
 # Because of showing type of commons we can skip an argument in Depends.
 # Like these commons: CommonQueryParams = Depends(). By default Depends takes CommonQueryParams as an argument.
 # This is special shortcut. Great!
+# Just comment for checking SSH key
